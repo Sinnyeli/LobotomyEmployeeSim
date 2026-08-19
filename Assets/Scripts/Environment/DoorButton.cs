@@ -6,6 +6,6 @@ public class DoorButton : MonoBehaviour, IInteractable
 
     public void Interact(HandType hand)
     {
-        door.OpenDoor();
+        door.ToggleDoor();
     }
 }

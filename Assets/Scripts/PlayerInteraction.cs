@@ -65,6 +65,7 @@ public class PlayerInteraction : MonoBehaviour
             if (interactable != null)
             {
                 interactable.Interact(hand);
+                Debug.Log("Interacted with: " + hit.collider.name);
             }
         }
     }

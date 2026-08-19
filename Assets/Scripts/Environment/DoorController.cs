@@ -3,122 +3,259 @@ using UnityEngine;
 
 public class DoorController : MonoBehaviour
 {
+    public enum DoorState
+    {
+        Closed,
+        Opening,
+        Open,
+        Closing
+    }
+
+    public enum OpenAxis
+    {
+        X,
+        Y,
+        Z
+    }
+
     [Header("Door Parts")]
-    [SerializeField] private Transform leftDoor;
-    [SerializeField] private Transform rightDoor;
+    [SerializeField] private DoorPart[] doorParts;
 
-    [Header("Open Offsets")]
-    [SerializeField] private Vector3 leftOpenOffset;
-    [SerializeField] private Vector3 rightOpenOffset;
+    private Vector3[] closedPositions;
+    private Vector3[] openPositions;
 
-    [Header("Settings")]
-    [SerializeField] private float moveSpeed = 2f;
-    [SerializeField] private float autoCloseDelay = 5f;
+    private DoorState currentState =
+        DoorState.Closed;
 
-    private Vector3 leftClosedPosition;
-    private Vector3 rightClosedPosition;
-
-    private Vector3 leftOpenPosition;
-    private Vector3 rightOpenPosition;
-
-    private bool isOpen;
-
-    private Coroutine moveRoutine;
-    private Coroutine autoCloseRoutine;
+    public DoorState CurrentState
+    {
+        get
+        {
+            return currentState;
+        }
+    }
 
     private void Awake()
     {
-        leftClosedPosition = leftDoor.localPosition;
-        rightClosedPosition = rightDoor.localPosition;
+        if (doorParts == null || doorParts.Length == 0)
+        {
+            Debug.LogWarning(
+                "No door parts have been assigned to " +
+                gameObject.name
+            );
 
-        leftOpenPosition =
-            leftClosedPosition + leftOpenOffset;
+            return;
+        }
 
-        rightOpenPosition =
-            rightClosedPosition + rightOpenOffset;
+        closedPositions =
+            new Vector3[doorParts.Length];
+
+        openPositions =
+            new Vector3[doorParts.Length];
+
+        for (int i = 0; i < doorParts.Length; i++)
+        {
+            if (doorParts[i] == null)
+            {
+                continue;
+            }
+
+            if (doorParts[i].doorObject == null)
+            {
+                continue;
+            }
+
+            closedPositions[i] =
+                doorParts[i].doorObject.localPosition;
+
+            Vector3 movement =
+                GetMovementDirection(doorParts[i]);
+
+            openPositions[i] =
+                closedPositions[i] +
+                movement;
+        }
+    }
+
+    private Vector3 GetMovementDirection(
+        DoorPart doorPart)
+    {
+        float direction = 1.0f;
+
+        Vector3 axis = Vector3.zero;
+
+        if (doorPart.openAxis == OpenAxis.X)
+        {
+            axis = Vector3.right;
+        }
+
+        if (doorPart.openAxis == OpenAxis.Y)
+        {
+            axis = Vector3.up;
+        }
+
+        if (doorPart.openAxis == OpenAxis.Z)
+        {
+            axis = Vector3.forward;
+        }
+
+        return axis *
+            direction *
+            doorPart.openDistance;
+    }
+
+    public void ToggleDoor()
+    {
+        if (currentState == DoorState.Closed)
+        {
+            OpenDoor();
+            return;
+        }
+
+        if (currentState == DoorState.Opening)
+        {
+            CloseDoor();
+            return;
+        }
+
+        if (currentState == DoorState.Open)
+        {
+            CloseDoor();
+            return;
+        }
+
+        if (currentState == DoorState.Closing)
+        {
+            OpenDoor();
+            return;
+        }
     }
 
     public void OpenDoor()
     {
-        if (isOpen)
+        if (doorParts == null ||
+            doorParts.Length == 0)
         {
             return;
         }
 
-        isOpen = true;
+        StopAllCoroutines();
 
-        if (moveRoutine != null)
-        {
-            StopCoroutine(moveRoutine);
-        }
-
-        moveRoutine =
-            StartCoroutine(
-                MoveDoors(
-                    leftOpenPosition,
-                    rightOpenPosition));
-
-        if (autoCloseRoutine != null)
-        {
-            StopCoroutine(autoCloseRoutine);
-        }
-
-        autoCloseRoutine =
-            StartCoroutine(AutoCloseRoutine());
+        StartCoroutine(OpenDoorRoutine());
     }
 
     public void CloseDoor()
     {
-        if (!isOpen)
+        if (doorParts == null ||
+            doorParts.Length == 0)
         {
             return;
         }
 
-        isOpen = false;
+        StopAllCoroutines();
 
-        if (moveRoutine != null)
-        {
-            StopCoroutine(moveRoutine);
-        }
-
-        moveRoutine =
-            StartCoroutine(
-                MoveDoors(
-                    leftClosedPosition,
-                    rightClosedPosition));
+        StartCoroutine(CloseDoorRoutine());
     }
 
-    private IEnumerator AutoCloseRoutine()
+    private IEnumerator OpenDoorRoutine()
     {
-        yield return new WaitForSeconds(autoCloseDelay);
+        currentState =
+            DoorState.Opening;
 
-        CloseDoor();
-    }
+        bool finished = false;
 
-    private IEnumerator MoveDoors(
-        Vector3 leftTarget,
-        Vector3 rightTarget)
-    {
-        while (
-            Vector3.Distance(leftDoor.localPosition, leftTarget) > 0.01f ||
-            Vector3.Distance(rightDoor.localPosition, rightTarget) > 0.01f)
+        while (!finished)
         {
-            leftDoor.localPosition =
-                Vector3.MoveTowards(
-                    leftDoor.localPosition,
-                    leftTarget,
-                    moveSpeed * Time.deltaTime);
+            finished = true;
 
-            rightDoor.localPosition =
-                Vector3.MoveTowards(
-                    rightDoor.localPosition,
-                    rightTarget,
-                    moveSpeed * Time.deltaTime);
+            for (int i = 0;
+                i < doorParts.Length;
+                i++)
+            {
+                if (doorParts[i] == null)
+                {
+                    continue;
+                }
+
+                if (doorParts[i].doorObject == null)
+                {
+                    continue;
+                }
+
+                float speed =
+                    doorParts[i].openSpeed;
+
+                doorParts[i].doorObject.localPosition =
+                    Vector3.MoveTowards(
+                        doorParts[i].doorObject.localPosition,
+                        openPositions[i],
+                        speed * Time.deltaTime
+                    );
+
+                if (
+                    doorParts[i].doorObject.localPosition !=
+                    openPositions[i]
+                )
+                {
+                    finished = false;
+                }
+            }
 
             yield return null;
         }
 
-        leftDoor.localPosition = leftTarget;
-        rightDoor.localPosition = rightTarget;
+        currentState =
+            DoorState.Open;
+    }
+
+    private IEnumerator CloseDoorRoutine()
+    {
+        currentState =
+            DoorState.Closing;
+
+        bool finished = false;
+
+        while (!finished)
+        {
+            finished = true;
+
+            for (int i = 0;
+                i < doorParts.Length;
+                i++)
+            {
+                if (doorParts[i] == null)
+                {
+                    continue;
+                }
+
+                if (doorParts[i].doorObject == null)
+                {
+                    continue;
+                }
+
+                float speed =
+                    doorParts[i].openSpeed;
+
+                doorParts[i].doorObject.localPosition =
+                    Vector3.MoveTowards(
+                        doorParts[i].doorObject.localPosition,
+                        closedPositions[i],
+                        speed * Time.deltaTime
+                    );
+
+                if (
+                    doorParts[i].doorObject.localPosition !=
+                    closedPositions[i]
+                )
+                {
+                    finished = false;
+                }
+            }
+
+            yield return null;
+        }
+
+        currentState =
+            DoorState.Closed;
     }
 }
