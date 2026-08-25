@@ -1,0 +1,27 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c3433ec53e794e3a6bec134bbfd2e344, type: 3}
+  m_Name: Dummy
+  m_EditorClassIdentifier: 
+  abnormalityName: Dummy
+  description: A test Capsule
+  abnormalityCode: T-000-000
+  abnormalityPrefab: {fileID: 3585250452089569860, guid: 3d202ffd7c9df1840ad0b0985c8abdc9, type: 3}
+  workResponses:
+  - workType: 1
+    multiplier: 0.5
+  - workType: 2
+    multiplier: 1.5
+  - workType: 3
+    multiplier: 1
+  - workType: 4
+    multiplier: 0.25

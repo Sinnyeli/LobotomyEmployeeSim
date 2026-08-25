@@ -4,6 +4,7 @@ using UnityEngine;
 
 public enum WorkType
 {
+    None, // Employee is not working on the abnormality.
     Instinct, // Basically any work that involves harming something physically. 
     Insight, // Basically any work that involves understanding or perceiving something in a new way. Holding a notepad often will do and scribbling it down.
     Attachment, // Basically any work that involves forming a bond with something or someone. 

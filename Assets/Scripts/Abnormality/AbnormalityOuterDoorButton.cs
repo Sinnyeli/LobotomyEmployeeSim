@@ -1,23 +1,89 @@
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
-
 
 public class AbnormalityOuterDoorButton : MonoBehaviour, IInteractable
 {
-    [SerializeField] private AbnormalityRoom abnormalityRoom;
+    public enum ButtonType
+    {
+        Entrance,
+        Exit
+    }
+
+    [SerializeField] private AbnormalityRoom room;
+    [SerializeField] private ButtonType buttonType;
+
 
     public void Interact(HandType hand)
     {
-        if (abnormalityRoom == null)
+        if (room == null)
         {
-            Debug.LogWarning(
-                "Abnormality Room is not assigned."
+            return;
+        }
+
+        if (buttonType == ButtonType.Entrance)
+        {
+            HandleEntranceButton();
+        }
+
+        if (buttonType == ButtonType.Exit)
+        {
+            HandleExitButton();
+        }
+    }
+
+
+    private void HandleEntranceButton()
+    {
+        if (!room.HasAbnormality())
+        {
+            return;
+        }
+
+        if (
+            room.CurrentState ==
+            AbnormalityRoom.RoomState.Closed)
+        {
+            room.ChangeState(
+                AbnormalityRoom.RoomState.Entering
             );
 
             return;
         }
 
-        abnormalityRoom.ToggleOuterDoor();
+        if (
+            room.CurrentState ==
+            AbnormalityRoom.RoomState.Entering)
+        {
+            room.ChangeState(
+                AbnormalityRoom.RoomState.Closed
+            );
+
+            return;
+        }
+    }
+
+
+    private void HandleExitButton()
+    {
+        if (
+            room.CurrentState ==
+            AbnormalityRoom.RoomState.Reviewing)
+        {
+            room.ChangeState(
+                AbnormalityRoom.RoomState.Exiting
+            );
+
+            return;
+        }
+
+        if (
+            room.CurrentState ==
+            AbnormalityRoom.RoomState.Exiting)
+        {
+            room.ChangeState(
+                AbnormalityRoom.RoomState.Reviewing
+            );
+
+            return;
+        }
     }
 }

@@ -20,7 +20,7 @@ public class DoorController : MonoBehaviour
 
     [Header("Door Parts")]
     [SerializeField] private DoorPart[] doorParts;
-
+            public System.Action OnDoorClosed;
     private Vector3[] closedPositions;
     private Vector3[] openPositions;
 
@@ -257,5 +257,12 @@ public class DoorController : MonoBehaviour
 
         currentState =
             DoorState.Closed;
+
+            if (OnDoorClosed != null)
+                {
+                    OnDoorClosed();
+                }
     }
+ 
+ 
 }
