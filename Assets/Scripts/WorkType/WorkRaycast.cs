@@ -1,8 +1,7 @@
 using UnityEngine;
 
 public class WorkRaycast : MonoBehaviour
-{ // Basically checks. If raycast hits abnormality, it'll send abnormality this specific work type.
-// If it misses, then it won't send anything. (return null statement)
+{
     [Header("Raycast")]
     [SerializeField] private float range = 10f;
     [SerializeField] private LayerMask workLayer;
@@ -13,28 +12,51 @@ public class WorkRaycast : MonoBehaviour
 
     public void TryWork(WorkAction workAction)
     {
+        // ============================================
+        // TEST 2 - WORK ACTION
+        // ============================================
+
+        Debug.Log(
+            "[WORK TEST 2] Player is attempting WorkAction."
+        );
+
+
         if (workAction == null)
         {
-            Debug.LogWarning(
-                "WorkRaycast: WorkAction is missing."
+            Debug.LogError(
+                "[WORK TEST 2 FAILED] Bare Hand WorkAction is NULL."
             );
 
             return;
         }
 
-        if (workResolver == null)
-        {
-            Debug.LogWarning(
-                "WorkRaycast: WorkResolver is missing."
-            );
 
-            return;
-        }
+        Debug.Log(
+            "[WORK TEST 2] WorkAction: " +
+            workAction.name
+        );
 
+
+        // ============================================
+        // TEST 1 - RAYCAST
+        // ============================================
 
         Ray ray = new Ray(
             transform.position,
             transform.forward
+        );
+
+
+        Debug.DrawRay(
+            transform.position,
+            transform.forward * range,
+            Color.red,
+            1f
+        );
+
+
+        Debug.Log(
+            "[WORK TEST 1] WorkRaycast is firing."
         );
 
 
@@ -44,9 +66,23 @@ public class WorkRaycast : MonoBehaviour
             range,
             workLayer))
         {
+            Debug.Log(
+                "[WORK TEST 1 FAILED] Raycast hit nothing."
+            );
+
             return;
         }
 
+
+        Debug.Log(
+            "[WORK TEST 1] Raycast hit: " +
+            hit.collider.name
+        );
+
+
+        // ============================================
+        // TEST 3 - ABNORMALITY
+        // ============================================
 
         AbnormalityController abnormality =
             hit.collider.GetComponentInParent<
@@ -56,13 +92,49 @@ public class WorkRaycast : MonoBehaviour
 
         if (abnormality == null)
         {
+            Debug.LogError(
+                "[WORK TEST 3 FAILED] " +
+                "Raycast hit an object, but it is NOT an Abnormality."
+            );
+
             return;
         }
+
+
+        Debug.Log(
+            "[WORK TEST 3] Abnormality identified: " +
+            abnormality.name
+        );
+
+
+        // ============================================
+        // TEST 4 - WORK RESOLVER
+        // ============================================
+
+        if (workResolver == null)
+        {
+            Debug.LogError(
+                "[WORK TEST 4 FAILED] " +
+                "WorkResolver reference is NULL."
+            );
+
+            return;
+        }
+
+
+        Debug.Log(
+            "[WORK TEST 4] Calling WorkResolver."
+        );
 
 
         workResolver.ResolveWork(
             workAction,
             abnormality
+        );
+
+
+        Debug.Log(
+            "[WORK TEST 4] WorkResolver finished."
         );
     }
 }

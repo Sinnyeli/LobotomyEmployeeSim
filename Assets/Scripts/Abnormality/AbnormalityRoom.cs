@@ -68,6 +68,7 @@ public class AbnormalityRoom : MonoBehaviour
             outerDoor.OnDoorClosed += OnOuterDoorClosed;
         }
 
+
         if (assignedAbnormality == null)
         {
             ChangeState(RoomState.Inactive);
@@ -204,13 +205,9 @@ public class AbnormalityRoom : MonoBehaviour
         playersInside++;
 
 
-        if (
-            currentState ==
-            RoomState.Entering)
+        if (currentState == RoomState.Entering)
         {
-            ChangeState(
-                RoomState.Reviewing
-            );
+            ChangeState(RoomState.Reviewing);
         }
     }
 
@@ -230,9 +227,7 @@ public class AbnormalityRoom : MonoBehaviour
             playersInside == 0 &&
             currentState == RoomState.Exiting)
         {
-            ChangeState(
-                RoomState.Closed
-            );
+            ChangeState(RoomState.Closed);
         }
     }
 
@@ -413,6 +408,10 @@ public class AbnormalityRoom : MonoBehaviour
     {
         CloseOuterDoor();
         CloseAbnormalityDoor();
+
+        // A work session ends when the room
+        // completely returns to Closed.
+        ResetAbnormalityWork();
     }
 
 
@@ -502,54 +501,92 @@ public class AbnormalityRoom : MonoBehaviour
 
 
     // --------------------------------------------------
+    // RESET WORK
+    // --------------------------------------------------
+
+    private void ResetAbnormalityWork()
+    {
+        if (abnormalityInstance == null)
+        {
+            return;
+        }
+
+
+        AbnormalityController controller =
+            abnormalityInstance.GetComponent<
+                AbnormalityController
+            >();
+
+
+        if (controller == null)
+        {
+            Debug.LogWarning(
+                "Abnormality instance has no " +
+                "AbnormalityController."
+            );
+
+            return;
+        }
+
+
+        controller.ResetWork();
+
+
+        Debug.Log(
+            "Abnormality work session reset."
+        );
+    }
+
+
+    // --------------------------------------------------
     // OUTER DOOR CALLBACK
     // --------------------------------------------------
 
     private void OnOuterDoorClosed()
-{
-    if (currentState == RoomState.Inactive)
     {
-        return;
+        if (currentState == RoomState.Inactive)
+        {
+            return;
+        }
+
+
+        if (currentState == RoomState.Entering)
+        {
+            if (HasPlayersInside())
+            {
+                ChangeState(
+                    RoomState.Reviewing
+                );
+            }
+            else
+            {
+                ChangeState(
+                    RoomState.Closed
+                );
+            }
+
+            return;
+        }
+
+
+        if (currentState == RoomState.Exiting)
+        {
+            if (HasPlayersInside())
+            {
+                ChangeState(
+                    RoomState.Reviewing
+                );
+            }
+            else
+            {
+                ChangeState(
+                    RoomState.Closed
+                );
+            }
+
+            return;
+        }
     }
-
-
-    if (currentState == RoomState.Entering)
-    {
-        if (HasPlayersInside())
-        {
-            ChangeState(
-                RoomState.Reviewing
-            );
-        }
-        else
-        {
-            ChangeState(
-                RoomState.Closed
-            );
-        }
-
-        return;
-    }
-
-
-    if (currentState == RoomState.Exiting)
-    {
-        if (HasPlayersInside())
-        {
-            ChangeState(
-                RoomState.Reviewing
-            );
-        }
-        else
-        {
-            ChangeState(
-                RoomState.Closed
-            );
-        }
-
-        return;
-    }
-}
 
 
     // --------------------------------------------------

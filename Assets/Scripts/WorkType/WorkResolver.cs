@@ -1,41 +1,24 @@
 using UnityEngine;
 
 public class WorkResolver : MonoBehaviour
-{// Deliver result to abnormality
+{
+    // Tool -> Action -> Work Resolver -> Abnormality Controller
     public void ResolveWork(
         WorkAction workAction,
         AbnormalityController abnormality)
     {
-        if (workAction == null)
+        if (workAction == null || abnormality == null)
         {
-            Debug.LogWarning(
-                "WorkResolver: WorkAction is null."
-            );
-
             return;
         }
 
-        if (abnormality == null)
+        if (workAction.contributions == null)
         {
-            Debug.LogWarning(
-                "WorkResolver: Abnormality is null."
-            );
-
-            return;
-        }
-
-        if (workAction.contributions == null ||
-            workAction.contributions.Length == 0)
-        {
-            Debug.LogWarning(
-                "WorkResolver: WorkAction has no contributions."
-            );
-
             return;
         }
 
         Debug.Log(
-            "Resolving: " +
+            "Resolving Work: " +
             workAction.actionName
         );
 

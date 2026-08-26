@@ -1,18 +1,29 @@
-using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
+using System;
 
-public class WorkProgress : MonoBehaviour
+[Serializable]
+public class WorkProgress
 {
-    // Start is called before the first frame update
-    void Start()
+    public WorkType workType;
+
+    public float currentAmount;
+
+    public float requiredAmount = 10f;
+
+    public bool IsComplete
     {
-        
+        get
+        {
+            return currentAmount >= requiredAmount;
+        }
     }
 
-    // Update is called once per frame
-    void Update()
+    public void Add(float amount)
     {
-        
+        currentAmount += amount;
+
+        if (currentAmount > requiredAmount)
+        {
+            currentAmount = requiredAmount;
+        }
     }
 }
